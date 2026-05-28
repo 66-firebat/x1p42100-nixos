@@ -50,6 +50,9 @@
         specialArgs = {inherit inputs;};
         system = "aarch64-linux";
         modules = [
+          # Pulls in the core installation/Calamares configuration
+          "${nixpkgs-patched}/nixos/modules/installer/cd-dvd/channel.nix"
+          # Pulls in the GNOME desktop environment for the ISO
           "${nixpkgs-patched}/nixos/modules/installer/cd-dvd/installation-cd-graphical-gnome.nix"
           #"${nixpkgs-patched}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
           ./iso.nix
