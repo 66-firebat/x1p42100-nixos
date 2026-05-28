@@ -10,6 +10,7 @@
     hash = "sha256-kIAdIJUrvFn4cpcLG6aAsm00l/WnHn4Knz9vnTen1as=";
   };
 in runCommand "harrison-qcom-laptops-firmware" {} ''
-  mkdir -p $out/lib/firmware/qcom/x1p42100/microsoft/blackrock
-cp ${surface_12}/lib/firmware/qcom/x1p42100/Microsoft/Surface12/{adsp_dtbs.elf,adspr.jsn,adsps.jsn,adspua.jsn,battmgr.jsn,cdsp_dtbs.elf,cdspr.jsn,qcadsp8380.mbn,qcadsprpc8380.cat,qccdsp8380.mbn,qcdxkmbase8380.bin,qcdxkmbase8380_pa_111.bin,qcdxkmsuc8380.mbn,qcdxkmsucpurwa.mbn} $out/lib/firmware/qcom/x1p42100/microsoft/blackrock
+  mkdir -p $out/lib/firmware/qcom/x1p42100/Microsoft/Surface12
+cp ${surface_12}/lib/firmware/qcom/x1p42100/Microsoft/Surface12/{adsp_dtbs.elf,adspr.jsn,adsps.jsn,adspua.jsn,battmgr.jsn,cdsp_dtbs.elf,cdspr.jsn,qcadsp8380.mbn,qcadsprpc8380.cat,qccdsp8380.mbn,qcdxkmbase8380.bin,qcdxkmbase8380_pa_111.bin,qcdxkmsuc8380.mbn,qcdxkmsucpurwa.mbn} $out/lib/firmware/qcom/x1p42100/Microsoft/Surface12/
 ''
+
