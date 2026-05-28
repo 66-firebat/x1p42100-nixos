@@ -1,58 +1,94 @@
 {
-  description = "NixOS configuration for Snapdragon X Elite (x1p42100) with Calamares Graphical Installer";
-
+  description = "Minimal NixOS installation media";
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-  };
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # hyprland.url = "github:hyprwm/Hyprland";
 
-  outputs = { self, nixpkgs, ... }@inputs:
-    let
-      system = "aarch64-linux"; # Set platform target to ARM64
-      pkgs = import nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
+    # nixos-muvm-fex = {
+    #   url = "github:nrabulinski/nixos-muvm-fex/native-build";
+    #   # inputs.nixpkgs.follows = "nixpkgs";
+    # };
+  };
+  nixConfig = {
+    extra-trusted-substituters = [
+      "http://silver-star.ling-lizard.ts.net:7124"
+    ];
+    extra-trusted-public-keys = [
+      "tomas-nixos-1:attQnEt6Gq99mwz5J/h8EVhCpavuB0/z/u0Bt/Mko7E="
+    ];
+  };
+  outputs = {
+    self,
+    nixpkgs,
+    ...
+  } @ inputs: let
+    pkgs-unpatched = nixpkgs.legacyPackages.aarch64-linux;
+    nixpkgs-patched =
+      (pkgs-unpatched.applyPatches {
+        name = "nixpkgs-patched";
+        src = nixpkgs;
+        patches = [
+          (pkgs-unpatched.fetchpatch {
+            url = "https://github.com/NixOS/nixpkgs/commit/de1fdb6310af8f70c98746ba4550dc2799a03621.patch";
+            hash = "sha256-brqJxblmqWFAk8JgxmxXeHoiaWiQtsCsOzht/WlH5eE=";
+          })
+        ];
+      }).overrideAttrs
+      {allowSubstitutes = true;};
+  in {
+    nixosModules = {
+      x1p = ./modules/x1p42100.nix;
+    };
+    packages."aarch64-linux".stubble = let
+      pkgs = import nixpkgs-patched {
+        system = "aarch64-linux";
       };
     in
-    {
-      # Standard hardware-bound target configs
-      nixosConfigurations = {
-        x1p42100 = nixpkgs.lib.nixosSystem {
-          inherit system;
-          modules = [
-            ./hardware-configuration.nix
-            ./configuration.nix
-            ./modules/hardware.nix
-            ./modules/firmware.nix
-          ];
-        };
+      pkgs.callPackage ./packages/stubble.nix {};
+    nixosConfigurations = {
+      slim5xISO = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs;};
+        system = "aarch64-linux";
+        modules = [
+          #"${nixpkgs-patched}/nixos/modules/installer/cd-dvd/installation-cd-graphical-gnome.nix"
+          #"${nixpkgs-patched}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+          "${nixpkgs-patched}/nixos/modules/installer/cd-dvd/installation-cd-base.nix"
+          "${nixpkgs-patched}/nixos/modules/installer/cd-dvd/installation-cd-graphical-calamares-gnome.nix"
+          ./iso.nix
+          ./modules/x1p42100.nix
+          {
+            # nixpkgs.buildPlatform = "x86_64-linux";
+            # pkgsCross.<yourtarget>.system
+            # nixpkgs.hostPlatform = "aarch64-linux";
 
-        # New deployment target: Generates a Bootable Graphical Installation ISO 
-        iso = nixpkgs.lib.nixosSystem {
-          inherit system;
-          modules = [
-            # Pulls in standard NixOS installer base configurations + Calamares engine
-            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-graphical-calamares-gnome.nix"
-
-            # Inject the repo's specific Snapdragon device-tree and firmware configurations
-            ./modules/hardware.nix
-            ./modules/firmware.nix
-
-            # Installer overrides and environmental settings
-            ({ pkgs, ... }: {
-              nixpkgs.config.allowUnfree = true;
-
-              # Ensures standard non-free Wi-Fi/Bluetooth firmware maps inside the installer environment
-              hardware.enableAllFirmware = true;
-
-              # Optional: You can pre-seed specific packages to be available inside the Live CD environment
-              environment.systemPackages = with pkgs; [
-                git
-                neovim
-                efibootmgr
+            fileSystems = {
+              "/" = {
+                device = "/dev/disk/by-label/root";
+                fsType = "ext4";
+              };
+              "/boot" = {
+                device = "/dev/disk/by-label/SYSTEM_DRV";
+                fsType = "vfat";
+              };
+            };
+            nix = {
+              settings.experimental-features = [
+                "nix-command"
+                "flakes"
               ];
-            })
-          ];
-        };
+            };
+            networking.networkmanager.enable = true;
+          }
+        ];
+      };
+      qcom-nixos = nixpkgs.lib.nixosSystem {
+        specialArgs = {inherit inputs;};
+        system = "aarch64-linux";
+        modules = [
+          ./modules/x1p42100.nix
+          ./configuration.nix
+        ];
       };
     };
+  };
 }
