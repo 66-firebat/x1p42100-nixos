@@ -309,6 +309,7 @@ in {
 # systemd.network.units."80-iwd.link".enable = lib.mkForce false;
 
   # The network manager apparently programmatically attempts to set random MAC addresses for the purposes of privacy and security. However, the current kernel from jglathe hardcodes the MAC address with bootmac; there were some observed conflicts with attaching to a network even if it was detected.
+
 networking.networkmanager = {
   enable = true;
   settings = {
@@ -322,15 +323,22 @@ networking.networkmanager = {
   };
 };
 
-systemd.services.wpa_supplicant.serviceConfig.ExecStart = lib.mkForce (
-  pkgs.writeShellScript "wpa_supplicant-start" ''
-    exec ${pkgs.wpa_supplicant}/bin/wpa_supplicant -s -u -Dnl80211,wext -c /etc/wpa_supplicant/imperative.conf -iwlu1
-  ''
-);
+# Fix the invalid multicast bit in the hardcoded bootmac for the Qualcomm wcn7850 WiFi chip.
+# The permaddr 8d:fd:f0:00:5a:ae has the multicast bit set (8d = 10001101) which causes
+# NetworkManager to mark the interface as unavailable. This link file corrects it to 8c:
+# before NM or wpa_supplicant see the interface.
+systemd.network.links."10-wlP4p1s0" = {
+  matchConfig.PermanentMACAddress = "8d:fd:f0:00:5a:ae";
+  linkConfig.MACAddress = "8c:fd:f0:00:5a:ae";
+};
 
-services.udev.extraRules = ''
-SUBSYSTEM=="net", ACTION=="add", KERNELS=="0004:01:00.0", RUN+="${pkgs.iproute2}/bin/ip link set %k address 8c:fd:f0:00:5a:ae"
-'';
+# Restrict wpa_supplicant to only manage the USB dongle (wlu1), leaving the
+# built-in Qualcomm WiFi (wlP4p1s0) free for NetworkManager to handle directly.
+# systemd.services.wpa_supplicant.serviceConfig.ExecStart = lib.mkForce (
+#   pkgs.writeShellScript "wpa_supplicant-start" ''
+#     exec ${pkgs.wpa_supplicant}/bin/wpa_supplicant -s -u -Dnl80211,wext -c /etc/wpa_supplicant/imperative.conf -iwlu1
+#   ''
+# );
 
 
   # networking = {
