@@ -9,8 +9,10 @@ nix build --extra-experimental-features 'nix-command flakes' .#nixosConfiguratio
 
 ```
 Flash the resulting ISO onto a USB drive using Rufus or BalenaEtcher or ventoy
+#### Warning if Rufus or BalenaEtcher doesnt boot then try ventoy
 ### Step 2: Device Preparation
- 1. **Disable BitLocker:** In Windows, open **Settings > Privacy & security > Device encryption** and turn it off. Wait for the decryption process to fully finish.
+ 1. **Disable BitLocker:** By opening powershell as a administrator and run
+``` Disable-BitLocker -MountPoint (Get-BitLockerVolume -MountPoint "C:")```
  2. **Partitioning:** Right-click the Windows Start button and select **Disk Management**. Shrink your main Windows partition (C:) to free up unallocated space for your NixOS root filesystem.
    * *Caution:* Leave the default Windows EFI partition intact. Do not attempt to resize it manually, as this can corrupt the bootloader layout.
  3. **Disable Secure Boot:** * Shut down the Surface Pro completely.
@@ -30,12 +32,12 @@ You can proceed with the manual command-line method.
  2. Drop into a root shell and format your target partition:
    ```
    sudo -i
-   mkfs.ext4 -L root /dev/sda2
+   mkfs.ext4 -L root /dev/sda3
    
    ```
  3. Mount your freshly formatted root partition along with the native EFI system partition:
    ```
-   mount /dev/sda2 /mnt
+   mount /dev/sda3 /mnt
    mkdir -p /mnt/boot
    mount /dev/sda1 /mnt/boot
    ```
