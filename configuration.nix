@@ -27,7 +27,7 @@ in {
   imports = [
     ./hardware.nix
     ./firmware.nix
-    ./ccache.nix
+    # ./ccache.nix
   ];
   nixpkgs.config.allowUnfree = true;
 
@@ -40,11 +40,11 @@ in {
     settings = {
       auto-optimise-store = true;
       cores = 6;
-      extra-sandbox-paths = [
-        config.programs.ccache.cacheDir
-        "/var/log/ccache"
-        "/mnt/cache/ccache"
-      ];
+      # extra-sandbox-paths = [
+      #   config.programs.ccache.cacheDir
+      #   "/var/log/ccache"
+      #   "/mnt/cache/ccache"
+      # ];
 
       use-cgroups = true;
       experimental-features = [
@@ -54,7 +54,7 @@ in {
       ];
       trusted-users = [
         "root"
-        "tomas"
+        "default"
       ];
     };
   };
@@ -64,16 +64,16 @@ in {
   users.users = {
     # root.initialPassword = "root";
 
-    tomas = {
+    default = {
       isNormalUser = true;
-      # initialPassword = "arm";
+      initialPassword = "arm";
       extraGroups = [
         "wheel"
         "dialout"
         "networkmanager"
         "docker"
       ];
-      shell = pkgs.zsh;
+      shell = pkgs.bash;
       uid = 1000;
     };
   };
@@ -93,7 +93,7 @@ in {
   programs._1password.enable = true;
   programs._1password-gui = {
     enable = true;
-    polkitPolicyOwners = ["tomas"];
+    polkitPolicyOwners = ["default"];
   };
   virtualisation.docker.enable = true;
 
@@ -108,10 +108,8 @@ in {
     alejandra
     apple-cursor
     attic-client
-    autojump
     bottles
     bottom
-    brave
     btop
     btrfs-assistant
     cachix
@@ -224,24 +222,6 @@ in {
       adwaita-fonts
     ];
   };
-  programs.dconf.profiles.tomas.databases = [
-    {
-      settings = {
-        "org/gnome/desktop/interface" = {
-          accent-color = "purple";
-        };
-
-        "org/gnome/mutter" = {
-          experimental-features = [
-            "scale-monitor-framebuffer" # Enables fractional scaling (125% 150% 175%)
-            "variable-refresh-rate" # Enables Variable Refresh Rate (VRR) on compatible displays
-            "xwayland-native-scaling" # Scales Xwayland applications to look crisp on HiDPI screens
-            "autoclose-xwayland" # automatically terminates Xwayland if all relevant X11 clients are gone
-          ];
-        };
-      };
-    }
-  ];
 
   services.kmscon = {
     enable = true;
@@ -271,7 +251,11 @@ in {
   };
   services.cachefilesd.enable = true;
 
+  # The modemmanager is used for cellular connections. It potentially may interfere with the Qualcomm wireless hardware because the wireless interfaces may appears as modems and the modem manager tries to communicate with the wireless interface in vain. It is deactivated for the sp12in
   networking.modemmanager.enable = false;
+
+  # Disable standalone wpa_supplicant - NM manages its own instance
+  # systemd.services.wpa_supplicant.enable = false;
 
   # # set up enivronment so that UCM configs are used as well
   environment.variables.ALSA_CONFIG_UCM2 = "${alsa-ucm-conf-firm}/share/alsa/ucm2";
@@ -321,39 +305,69 @@ in {
   #     PROGRAM="${pkgs.iproute2}/bin/ip link set %k address 8c:1d:55:0d:50:54"
   # '';
 
-  # systemd.network.units."80-iwd.link".enable = lib.mkForce false;
 
-  networking = {
-    hostName = "qcom-nixos";
+# systemd.network.units."80-iwd.link".enable = lib.mkForce false;
 
-    # wireless = {
-    #   enable = false; # true; # false;
-    #   iwd = {
-    #     enable = true;
-    #     settings = {
-    #       General.ControlPortOverNL80211 = false;
-    #       Settings = {
-    #         AutoConnect = true;
-    #         # AlwaysRandomizeAddress = true;
-    #       };
-    #       Network = {
-    #         EnableIPv6 = true;
-    #         RoutePriorityOffset = 300;
-    #       };
-    #       # DriverQuirks.DefaultInterface = "wlan0";
-    #     };
-    #   };
-    # };
-
-    networkmanager = {
-      enable = true;
-
-      wifi = {
-        # powersave = true;
-        # backend = "iwd";
-      };
+  # The network manager apparently programmatically attempts to set random MAC addresses for the purposes of privacy and security. However, the current kernel from jglathe hardcodes the MAC address with bootmac; there were some observed conflicts with attaching to a network even if it was detected.
+networking.networkmanager = {
+  enable = true;
+  settings = {
+    device = {
+      "wifi.scan-rand-mac-address" = "no";
+    };
+    connection = {
+      "wifi.cloned-mac-address" = "permanent";
+      "ethernet.cloned-mac-address" = "permanent";
     };
   };
+};
+
+# FAILED: Attempt to stop wpa_supplicant from being restarted, as observed in /etc/udev/rules.d/99-local.rules
+# networking.wireless.enable = lib.mkForce false;
+
+# FAILED: Attempt to set a dummy interface because wpa_supplicant.nix generates the 99-local.rules text when it has no interfaces configured, and then injects a restart rule into the rules file, which is problematic because it basically undoes the mac address udev script every time that udev process is invoked.
+# networking.wireless.interfaces = [ "none" ];
+
+# This is a udev rule that changes a hardcoded mac. In the current state of the kernel, the multicast bit at the start of the MAC address (8d) is problematic because it is a multicast bit. The udev rule activates whenever a new device is "add"ed to the "net" subsystem, and matches the PCI address of the chip in the system (acquired from dmesg logs). In order to be made protable, KERNELS==<value> may be switched with DRIVER=="ath12k_pci", although this presents a problem if there are multiple ath12k_pci devices, which could cause the ip link to be inadvertently set, causing downstream issues. After the condition has been met, the RUN event invokes the mac change for that specific device (by it's kernel name, %k). Indentation matters, and the wrong indentation will break the rule, so ensure that indendtation rules are being followed.
+
+services.udev.extraRules = ''
+SUBSYSTEM=="net", ACTION=="add", KERNELS=="0004:01:00.0", RUN+="${pkgs.iproute2}/bin/ip link set %k address 8c:fd:f0:00:5a:ae", GOTO="no_wpa_restart"
+ACTION=="add|remove", SUBSYSTEM=="net", ENV{DEVTYPE}=="wlan", RUN+="/run/current-system/systemd/bin/systemctl try-restart wpa_supplicant.service"
+LABEL="no_wpa_restart"
+'';
+
+
+  # networking = {
+  #   hostName = "qcom-nixos";
+  #
+  #   # wireless = {
+  #   #   enable = false; # true; # false;
+  #   #   iwd = {
+  #   #     enable = true;
+  #   #     settings = {
+  #   #       General.ControlPortOverNL80211 = false;
+  #   #       Settings = {
+  #   #         AutoConnect = true;
+  #   #         # AlwaysRandomizeAddress = true;
+  #   #       };
+  #   #       Network = {
+  #   #         EnableIPv6 = true;
+  #   #         RoutePriorityOffset = 300;
+  #   #       };
+  #   #       # DriverQuirks.DefaultInterface = "wlan0";
+  #   #     };
+  #   #   };
+  #   # };
+  #
+  #   networkmanager = {
+  #     enable = true;
+  #
+  #     wifi = {
+  #       # powersave = true;
+  #       # backend = "iwd";
+  #     };
+  #   };
+  # };
 
   hardware.bluetooth.enable = true;
 
@@ -469,10 +483,8 @@ in {
   fileSystems = {
     "/" = {
       device = "/dev/disk/by-label/root-arm64";
-      fsType = "btrfs";
+      fsType = "ext4";
       options = [
-        "subvol=rootfs"
-        "compress=zstd"
         "noatime"
       ];
       neededForBoot = true;
@@ -498,15 +510,15 @@ in {
     # };
   };
 
-  swapDevices = [
-    {
-      device = "/dev/disk/by-partlabel/disk-swap";
-      size = 16 * 1024;
-      options = ["discard"];
-    }
-  ];
+  # swapDevices = [
+  #   {
+  #     device = "/dev/disk/by-partlabel/disk-swap";
+  #     size = 16 * 1024;
+  #     options = ["discard"];
+  #   }
+  # ];
 
-  boot.resumeDevice = "/dev/disk/by-partlabel/disk-swap";
+  # boot.resumeDevice = "/dev/disk/by-partlabel/disk-swap";
   # boot.kernelPackages = pkgs.callPackage ./packages/x1e42100-linux.nix { withCcache = true; };
   boot.kernelPackages = lib.mkForce (pkgs.callPackage ./packages/x1e42100-linux.nix { withCcache = false; });
   zramSwap.enable = true;

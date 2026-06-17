@@ -7,6 +7,7 @@
   fetchzip,
   fetchFromGitHub,
   linux-firmware,
+  zstd,
 }:
 stdenv.mkDerivation (finalAttrs: {
   pname = "surface-firmware";
@@ -38,6 +39,7 @@ stdenv.mkDerivation (finalAttrs: {
     cabextract
     rsync
     python3
+    zstd
   ];
 
   buildCommand = ''
@@ -58,6 +60,13 @@ stdenv.mkDerivation (finalAttrs: {
     ls -la
     cat board-2.json
     mv "bus=pci,vendor=17cb,device=1107,subsystem-vendor=17cb,subsystem-device=3378,qmi-chip-id=2,qmi-board-id=255.bin" $out/lib/firmware/ath12k/WCN7850/hw2.0/board.bin
+
+    # Decompress GPU ZAP shader firmware so the initrd builder can find and
+    # re-compress it correctly (otherwise it stays as .zst and gets double-compressed)
+    if [ -f "$out/lib/firmware/qcom/gen71500_zap.mbn.zst" ]; then
+      zstd -d "$out/lib/firmware/qcom/gen71500_zap.mbn.zst" -o "$out/lib/firmware/qcom/gen71500_zap.mbn"
+      rm "$out/lib/firmware/qcom/gen71500_zap.mbn.zst"
+    fi
 
     find "$out" -exec touch --date=2000-01-01 {} +
   '';
