@@ -33,7 +33,7 @@ You can proceed with the manual command-line method.
  2. Drop into a root shell and format your target partition also /mnt and /mnt/boot are hardecoded by nixos-install:
    ```
    sudo -i
-   mkfs.ext4 -L root /dev/sda2
+   mkfs.ext4 -L root /dev/sda3
    fatlabel /dev/sda1 BOOT
    ```
  3. Mount your freshly formatted root partition along with the native EFI system partition:
