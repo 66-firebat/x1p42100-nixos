@@ -26,14 +26,15 @@ Flash the resulting ISO onto a USB drive using Rufus or BalenaEtcher or ventoy
  3. Press and release the **Power** button.
  4. Keep holding **Volume Down** until the Surface logo appears and the device begins booting from the USB drive.
 ### Step 4: Installation
+#### Install on your own risk.
 You can proceed with the manual command-line method.
 #### Manual CLI Installation
  1. Open a terminal window and connect to Wi-Fi via nmtui.
- 2. Drop into a root shell and format your target partition:
+ 2. Drop into a root shell and format your target partition also /mnt and /mnt/boot are hardecoded by nixos-install:
    ```
    sudo -i
-   mkfs.ext4 -L root /dev/sda3
-   
+   mkfs.ext4 -L root /dev/sda2
+   fatlabel /dev/sda1 BOOT
    ```
  3. Mount your freshly formatted root partition along with the native EFI system partition:
    ```
