@@ -65,15 +65,15 @@ Enter a root shell and format the previously created partition:
 
 ```
 sudo -i
-mkfs.ext4 -L root /dev/nvme0n1pX
+mkfs.ext4 -L root /dev/sda2
 ```
 
 Mount the root filesystem and the EFI partition:
 
 ```
-mount /dev/disk/by-label/root /mnt
+mount /dev/sda2 /mnt
 mkdir -p /mnt/boot
-mount /dev/disk/by-label/SYSTEM_DRV /mnt/boot
+mount /dev/sda1 /mnt/boot
 ```
 
 Finally, run `nixos-install`:
