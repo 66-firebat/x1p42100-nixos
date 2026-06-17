@@ -322,6 +322,11 @@ networking.networkmanager = {
   };
 };
 
+
+# Attempt to switch to an iwd backend, tried with the mac fix to prevent wpa_supplicant from occupying the wireless interface before NetworkManager access
+networking.networkmanager.wifi.backend = "iwd";
+networking.wireless.iwd.enable = true;
+
 # FAILED: Attempt to stop wpa_supplicant from being restarted, as observed in /etc/udev/rules.d/99-local.rules
 # networking.wireless.enable = lib.mkForce false;
 
@@ -331,9 +336,7 @@ networking.networkmanager = {
 # This is a udev rule that changes a hardcoded mac. In the current state of the kernel, the multicast bit at the start of the MAC address (8d) is problematic because it is a multicast bit. The udev rule activates whenever a new device is "add"ed to the "net" subsystem, and matches the PCI address of the chip in the system (acquired from dmesg logs). In order to be made protable, KERNELS==<value> may be switched with DRIVER=="ath12k_pci", although this presents a problem if there are multiple ath12k_pci devices, which could cause the ip link to be inadvertently set, causing downstream issues. After the condition has been met, the RUN event invokes the mac change for that specific device (by it's kernel name, %k). Indentation matters, and the wrong indentation will break the rule, so ensure that indendtation rules are being followed.
 
 services.udev.extraRules = ''
-SUBSYSTEM=="net", ACTION=="add", KERNELS=="0004:01:00.0", RUN+="${pkgs.iproute2}/bin/ip link set %k address 8c:fd:f0:00:5a:ae", GOTO="no_wpa_restart"
-ACTION=="add|remove", SUBSYSTEM=="net", ENV{DEVTYPE}=="wlan", RUN+="/run/current-system/systemd/bin/systemctl try-restart wpa_supplicant.service"
-LABEL="no_wpa_restart"
+SUBSYSTEM=="net", ACTION=="add", KERNELS=="0004:01:00.0", RUN+="${pkgs.iproute2}/bin/ip link set %k address 8c:fd:f0:00:5a:ae"
 '';
 
 
