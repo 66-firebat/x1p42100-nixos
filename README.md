@@ -4,6 +4,40 @@ sudo nixos-install --root /mnt --no-channel-copy --no-root-password --flake .?su
 # Updates
 - As of kernel 7.1, bootmac has been integrated into the kernel configuration, and is included with jglathe's shipped kernel
 
+# TOSTUDY
+```
+ networking = {
+   hostName = "qcom-nixos";
+
+    wireless = {
+      enable = false; # true; # false;
+      iwd = {
+        enable = true;
+        settings = {
+          General.ControlPortOverNL80211 = false;
+          Settings = {
+            AutoConnect = true;
+            # AlwaysRandomizeAddress = true;
+          };
+          Network = {
+            EnableIPv6 = true;
+            RoutePriorityOffset = 300;
+          };
+          # DriverQuirks.DefaultInterface = "wlan0";
+        };
+      };
+    };
+
+   networkmanager = {
+     enable = true;
+
+     wifi = {
+       # powersave = true;
+       # backend = "iwd";
+     };
+   };
+ };
+```
 
 # NixOS for x1p42100
 

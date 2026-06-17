@@ -24,11 +24,7 @@
     ];
   };
 in {
-  imports = [
-    ./hardware.nix
-    ./firmware.nix
-    # ./ccache.nix
-  ];
+  imports = [];
   nixpkgs.config.allowUnfree = true;
 
   nix = {
@@ -341,38 +337,6 @@ systemd.network.links."10-wlP4p1s0" = {
 # );
 
 
-  # networking = {
-  #   hostName = "qcom-nixos";
-  #
-  #   # wireless = {
-  #   #   enable = false; # true; # false;
-  #   #   iwd = {
-  #   #     enable = true;
-  #   #     settings = {
-  #   #       General.ControlPortOverNL80211 = false;
-  #   #       Settings = {
-  #   #         AutoConnect = true;
-  #   #         # AlwaysRandomizeAddress = true;
-  #   #       };
-  #   #       Network = {
-  #   #         EnableIPv6 = true;
-  #   #         RoutePriorityOffset = 300;
-  #   #       };
-  #   #       # DriverQuirks.DefaultInterface = "wlan0";
-  #   #     };
-  #   #   };
-  #   # };
-  #
-  #   networkmanager = {
-  #     enable = true;
-  #
-  #     wifi = {
-  #       # powersave = true;
-  #       # backend = "iwd";
-  #     };
-  #   };
-  # };
-
   hardware.bluetooth.enable = true;
 
   programs = {
@@ -380,12 +344,6 @@ systemd.network.links."10-wlP4p1s0" = {
       enable = true;
       package = pkgs.firefox;
     };
-    # hyprland = {
-    #   enable = true;
-    #   package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
-    #   portalPackage =
-    #     inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
-    # };
   };
 
   services.openssh.enable = true;
@@ -523,8 +481,7 @@ systemd.network.links."10-wlP4p1s0" = {
   # ];
 
   # boot.resumeDevice = "/dev/disk/by-partlabel/disk-swap";
-  # boot.kernelPackages = pkgs.callPackage ./packages/x1e42100-linux.nix { withCcache = true; };
-  boot.kernelPackages = lib.mkForce (pkgs.callPackage ./packages/x1e42100-linux.nix { withCcache = false; });
+
   zramSwap.enable = true;
 
   system.stateVersion = "26.05";

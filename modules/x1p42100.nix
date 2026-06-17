@@ -51,8 +51,12 @@ in {
     # enableRedistributableFirmware = true; # lib.mkForce false; # true;;
 
     firmware = [
+      linux-firmware
+      wireless-regdb
       firm
     ];
+
+    enableRedistributableFirmware = true;
   };
 
   specialisation.el2.configuration = {
@@ -61,6 +65,12 @@ in {
   };
 
   systemd.tpm2.enable = false;
+
+  environment = {
+    systemPackages = [ firm ];
+    pathsToLink = ["/share/alsa"];
+  };
+
   boot = {
     growPartition = false;
     loader = {
@@ -82,6 +92,7 @@ in {
 
     hardwareScan = true;
     initrd = {
+      systemd.enable = true;
       systemd.tpm2.enable = false;
       availableKernelModules = [
         # Definitely needed for USB:
@@ -145,12 +156,15 @@ in {
     };
 
     kernelParams = [
+      "earlycon=efifb"
       "pd_ignore_unused"
       "clk_ignore_unused"
       "efi=noruntime"
+      "efi=debug"
       "pcie_aspm=off"
       "regulator_ignore_unused"
       "console=tty0"
+      "loglevel=7"
       # "cma=128MB"
       # "snd-soc-x1e80100.i_accept_the_danger=1"
     ];

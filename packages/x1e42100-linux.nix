@@ -35,6 +35,7 @@ in
       };
 
       kernelPatches = [
+        # Previously, we needed a mac-address patch to fix the devicetree (dts) file to hardcode the mac address the devicetree. It was no longer needed in the 7.1 kernels
         # {
         #   name = "mac-address";
         #   patch = ./mac-address.patch;
