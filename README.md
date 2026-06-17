@@ -1,109 +1,49 @@
-# Build command 
-sudo nixos-install --root /mnt --no-channel-copy --no-root-password --flake .?submodules=1#qcom-nixos
-
-# Updates
-- As of kernel 7.1, bootmac has been integrated into the kernel configuration, and is included with jglathe's shipped kernel
-
-
-# NixOS for x1p42100
-
-NixOS for the Qualcomm Snapdragon X Plus (x1p42100) based _Lenovo Ideapad Slim
-5x_.
-
-# Installation
-
-_Note: This exact installation process has yet to be tested._
-
-### Step 1: Building the installer ISO
-
-Currently, a binary release of the ISO is not available, and you will have to
-compile it yourself. Since cross-compiling is not currently supported, the ISO
-must be built on the device itself or another ARM64 based system.
-
-The easiest way to build the ISO on Windows is probably to use WSL with
-[Nix installed](https://nixos.org/download/#nix-install-windows).
-
-Once you have Nix installed on some ARM64 system, you can use the following
-commands to build the ISO:
-
-```
-git clone git@github.com:Tokor0/x1p42100-nixos
+## Updates
+ * As of kernel 7.1, bootmac has been integrated into the kernel configuration, resolving previous networking setup steps.
+### Step 1: Building the Installer ISO
+Currently, a pre-built binary ISO is not available. Because cross-compiling can be problematic, the ISO must be built on an ARM64 environment (such as WSL with Nix installed on your Surface Pro, or another ARM64 Linux system).
+```bash
+git clone [https://github.com/66-firebat/x1p42100-nixos.git](https://github.com/66-firebat/x1p42100-nixos.git)
 cd x1p42100-nixos
 nix build --extra-experimental-features 'nix-command flakes' .#nixosConfigurations.slim5xISO.config.system.build.isoImage
+
 ```
-
-Then, flash the ISO onto a USB-**A** device. Note that USB-C will not work.
-
-### Step 2: Device preparation
-
-BitLocker must be turned off. To do this, search for "Device encryption
-settings" in the start menu, and turn "Device encryption" off.
-
-Next, create a new partition for the Linux root filesystem. To do this you
-probably want to shrink the Windows partition. Search for "Create and format
-hard disk partitions" in the start menu and shrink the (C:) partition to your
-liking. Then, create the new partition in the free space.
-
-_Note: The default EFI partition is very small, and you may want to extend it.
-This may break the Windows installation._
-
+Flash the resulting ISO onto a USB drive using Rufus or BalenaEtcher or ventoy
+### Step 2: Device Preparation
+ 1. **Disable BitLocker:** In Windows, open **Settings > Privacy & security > Device encryption** and turn it off. Wait for the decryption process to fully finish.
+ 2. **Partitioning:** Right-click the Windows Start button and select **Disk Management**. Shrink your main Windows partition (C:) to free up unallocated space for your NixOS root filesystem.
+   * *Caution:* Leave the default Windows EFI partition intact. Do not attempt to resize it manually, as this can corrupt the bootloader layout.
+ 3. **Disable Secure Boot:** * Shut down the Surface Pro completely.
+   * Press and hold the **Volume Up (+)** button.
+   * Press and release the **Power** button.
+   * Keep holding **Volume Up** until the Surface UEFI screen appears.
+   * Navigate to **Security**, select **Change configuration** under Secure Boot, set it to **None**, and restart.
 ### Step 3: Booting the ISO
-
-Reboot the laptop, and enter the UEFI menu by pressing F2 when the boot logo
-screen is showing.
-
-Go to "Security > Secure Boot" and disable it. Then exit and save the changes.
-
-Connect the previously flashed bootable USB drive to the laptop and enter the
-boot menu by pressing F12 at boot and select the drive.
-
+ 1. Shut down the device completely and plug in your flashed installation USB drive.
+ 2. Press and hold the **Volume Down (-)** button.
+ 3. Press and release the **Power** button.
+ 4. Keep holding **Volume Down** until the Surface logo appears and the device begins booting from the USB drive.
 ### Step 4: Installation
+You can proceed with the manual command-line method.
+#### Manual CLI Installation
+ 1. Open a terminal window and connect to Wi-Fi via nmtui.
+ 2. Drop into a root shell and format your target partition:
+   ```
+   sudo -i
+   mkfs.ext4 -L root /dev/sda2
+   
+   ```
+ 3. Mount your freshly formatted root partition along with the native EFI system partition:
+   ```
+   mount /dev/sda2 /mnt
+   mkdir -p /mnt/boot
+   mount /dev/sda1 /mnt/boot
+   ```
 
-First, connect to Wi-Fi using `nmtui`.
-
-Enter a root shell and format the previously created partition:
-
-```
-sudo -i
-mkfs.ext4 -L root /dev/sda2
-```
-
-Mount the root filesystem and the EFI partition:
-
-```
-mount /dev/sda2 /mnt
-mkdir -p /mnt/boot
-mount /dev/sda1 /mnt/boot
-```
-
-Finally, run `nixos-install`:
-
-```
-nixos-install --root /mnt --no-channel-copy --no-root-passoword --flake git@github.com:Tokor0/x1p42100-nixos#slim5xSystem
-```
-
-Now, NixOS is installed, and you should be able to boot into it by rebooting and
-selecting the appropriate boot option.
-
-After booting, you can login with the username `user` and password `arm`. You
-probably want to change the password using `passwd`. You can connect to Wi-Fi
-using `nmtui`.
-
-By default, some programs are installed. You can start Hyprland using
-`start-hyprland`. In Hyprland, press Super-Q to open a terminal emulator, or
-Super-Space to open a program launcher. Here, Super refers to the Windows key.
-
-# Using in your own NixOS configuration
-
-**TODO**
-
-## TODO
-
-- Get the ISO to boot **DONE**
-- Add a system configuration output to the flake **DONE**
-- Get firmware -> graphics **DONE**
-- Make it convenient to use in other configs **DONE**
-- Finish the guide **IN PROGRESS**
+ 4. Run the installer flake targeting the configuration profile:
+   ```
+   sudo nixos-install --root /mnt --no-channel-copy --no-root-password --flake .?submodules=1#qcom-nixos
+   ```
 
 ## Related repos
 
