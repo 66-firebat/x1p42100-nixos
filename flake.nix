@@ -2,6 +2,7 @@
   description = "Minimal NixOS installation media";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    llm-agents.url = "github:numtide/llm-agents.nix";
   };
   nixConfig = {
     extra-trusted-substituters = [

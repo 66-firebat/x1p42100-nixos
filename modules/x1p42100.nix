@@ -51,8 +51,8 @@ in {
     # enableRedistributableFirmware = true; # lib.mkForce false; # true;;
 
     firmware = [
-      linux-firmware
-      wireless-regdb
+      pkgs.linux-firmware
+      pkgs.wireless-regdb
       firm
     ];
 

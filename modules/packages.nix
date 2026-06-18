@@ -1,12 +1,13 @@
 {
   pkgs,
+  inputs,
   ...
 }: let
   readmbn = pkgs.callPackage ../packages/readmbn.nix {};
 in {
   environment.systemPackages = with pkgs; [
+    inputs.llm-agents.packages.${pkgs.stdenv.system}.pi
     alejandra
-    apple-cursor
     attic-client
     bottles
     bottom
@@ -37,7 +38,6 @@ in {
     gnome-tweaks
     gnumake
     gparted-full
-    helix
     htop
     hw-probe
     kitty
@@ -76,14 +76,12 @@ in {
     tv
     usbutils
     uxplay
-    vscode
     waypipe
     wget2
     wike
     wikiman
     wofi
     yazi
-    zellij
     zsh
   ];
 

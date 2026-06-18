@@ -37,6 +37,11 @@
         "dialout"
         "networkmanager"
         "docker"
+	"plugdev"
+	"storage"
+	"video"
+	"audio"
+	"input"
       ];
       shell = pkgs.bash;
       uid = 1000;
@@ -44,7 +49,7 @@
   };
 
   programs.direnv.enable = true;
-  environment.shells = [pkgs.zsh];
+  environment.shells = [pkgs.bash];
   programs.nh.enable = true;
   programs._1password.enable = true;
   programs._1password-gui = {
