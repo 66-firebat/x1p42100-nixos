@@ -92,9 +92,9 @@
         ];
     };
 
-    xdg.configFile."hypr/hyprland-user.lua".source = ../configuration_modules/hyprland/hyprland-user.lua;
-    xdg.configFile."hypr/keymaps.lua".source = ../configuration_modules/hyprland/keymaps.lua;
-    xdg.configFile."hypr/autocmds.lua".source = ../configuration_modules/hyprland/autocmds.lua;
+    xdg.configFile."hypr/hyprland-user.lua".source = ./git_repositories/hyprland/hyprland-user.lua;
+    xdg.configFile."hypr/keymaps.lua".source = ./git_repositories/hyprland/keymaps.lua;
+    xdg.configFile."hypr/autocmds.lua".source = ./git_repositories/hyprland/autocmds.lua;
 
     programs.firefox = {
         enable = true;
@@ -139,7 +139,7 @@
             settings = {
                 "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
             };
-            userChrome = builtins.readFile ./git_repositories/firefox/userChrome.css;
+            # userChrome = builtins.readFile ./git_repositories/firefox/userChrome.css;
         };
     };
 
