@@ -21,7 +21,7 @@
       ];
       trusted-users = [
         "root"
-        "default"
+	"firebat"
       ];
     };
   };
@@ -29,7 +29,7 @@
   services.fwupd.enable = true;
 
   users.users = {
-    default = {
+    firebat = {
       isNormalUser = true;
       initialPassword = "arm";
       extraGroups = [
@@ -54,7 +54,7 @@
   programs._1password.enable = true;
   programs._1password-gui = {
     enable = true;
-    polkitPolicyOwners = ["default"];
+    polkitPolicyOwners = ["firebat"];
   };
   nixpkgs.config.segger-jlink.acceptLicense = true;
 }

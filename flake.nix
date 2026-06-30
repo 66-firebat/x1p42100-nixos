@@ -3,6 +3,17 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     llm-agents.url = "github:numtide/llm-agents.nix";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    hyprland = {
+      url = "github:hyprwm/Hyprland";
+    };
+    hypr-darkwindow = {
+      url = "github:micha4w/Hypr-DarkWindow";
+      inputs.hyprland.follows = "hyprland";
+    };
   };
   nixConfig = {
     extra-trusted-substituters = [
@@ -15,6 +26,7 @@
   outputs = {
     self,
     nixpkgs,
+    home-manager,
     ...
   } @ inputs: let
     pkgs-unpatched = nixpkgs.legacyPackages.aarch64-linux;
@@ -80,6 +92,11 @@
         modules = [
           ./modules/x1p42100.nix
           ./configuration.nix
+	  # Pull in Home Manager, bind the user config, and pass flake inputs down:
+          home-manager.nixosModules.home-manager {
+            home-manager.extraSpecialArgs = { inherit inputs; };
+            home-manager.users.firebat = import ./home.nix;
+          }
         ];
       };
     };

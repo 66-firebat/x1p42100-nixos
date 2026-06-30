@@ -1,0 +1,21 @@
+[submodule "git_repositories/firefox"]
+	path = git_repositories/firefox
+	url = git@66-firebat:66-firebat/firefox.git
+[submodule "git_repositories/bash"]
+	path = git_repositories/bash
+	url = git@66-firebat:66-firebat/bash.git
+[submodule "git_repositories/nvim"]
+	path = git_repositories/nvim
+	url = git@66-firebat:66-firebat/nvim.git
+[submodule "git_repositories/sioyek"]
+	path = git_repositories/sioyek
+	url = git@66-firebat:66-firebat/sioyek.git
+[submodule "git_repositories/ghostty"]
+	path = git_repositories/ghostty
+	url = git@66-firebat:66-firebat/ghostty.git
+[submodule "git_repositories/assets"]
+	path = git_repositories/assets
+	url = git@66-firebat:66-firebat/assets.git
+[submodule "git_repositories/hyprland"]
+	path = git_repositories/hyprland
+	url = git@66-firebat:66-firebat/hyprland.git
