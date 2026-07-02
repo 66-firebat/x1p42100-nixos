@@ -7,15 +7,18 @@
 
   services.keyd = {
     enable = true;
-    settings = {
-      main = {
-        # Maps capslock to the overload function
-        # overload(layer, action_on_tap)
-        # 'control' is a built-in layer in keyd
-        capslock = "overload(control, esc)";
+    keyboards = {
+      default = {
+        settings = {
+          main = {
+            # Maps capslock to the overload function
+            capslock = "overload(control, esc)";
+          };
+        };
       };
     };
   };
+
 
   services.gvfs.enable = true;
   hardware.wooting.enable = true;
