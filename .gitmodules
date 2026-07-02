@@ -22,3 +22,6 @@
 [submodule "git_repositories/xdg-portal-termfile"]
 	path = git_repositories/xdg-portal-termfile
 	url = git@66-firebat:66-firebat/xdg-portal-termfile.git
+[submodule "git_repositories/pi"]
+	path = git_repositories/pi
+	url = git@66-firebat:66-firebat/pi.git
