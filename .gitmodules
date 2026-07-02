@@ -25,3 +25,6 @@
 [submodule "git_repositories/pi"]
 	path = git_repositories/pi
 	url = git@66-firebat:66-firebat/pi.git
+[submodule "git_repositories/emacs"]
+	path = git_repositories/emacs
+	url = git@66-firebat:66-firebat/emacs.git

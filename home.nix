@@ -61,13 +61,19 @@
         source = ./git_repositories/sioyek;
     };
 
-    # config for sioyek
+    # config for pi
     home.file.".config/pi" = {
         enable = true;
         recursive = true;
-        source = ./git_repositories/sioyek;
+        source = ./git_repositories/pi;
     };
 
+    # config for emacs
+    home.file.".config/emacs" = {
+        enable = true;
+        recursive = true;
+        source = ./git_repositories/emacs;
+    };
 
     # config for GNOME icons
     home.file.".local/share/icons" = {
