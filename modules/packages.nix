@@ -23,6 +23,7 @@ in {
     devenv
     direnv
     distrobox
+    emacs
     firefoxpwa
     firmware-manager
     firmware-updater
