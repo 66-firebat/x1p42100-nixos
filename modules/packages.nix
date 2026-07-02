@@ -82,6 +82,7 @@ in {
     wikiman
     wofi
     yazi
+    zoxide
     zsh
   ];
 

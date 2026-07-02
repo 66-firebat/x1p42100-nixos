@@ -46,11 +46,11 @@
     home.file.".config/xdg-desktop-portal-termfilechooser" = {
         enable = true;
         recursive = true;
-        source = ../configuration_modules/xdg-portal-termfile;
+        source = ./git_repositories/xdg-portal-termfile;
     };
 
     home.file.".config/xdg-desktop-portal-termfilechooser/ghostty-wrapper.sh" = {
-        source = ../configuration_modules/xdg-portal-termfile/ghostty-wrapper.sh;
+        source = ./git_repositories/xdg-portal-termfile/ghostty-wrapper.sh;
         executable = true;
     };
 
