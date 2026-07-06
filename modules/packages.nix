@@ -42,6 +42,7 @@ in {
     htop
     hw-probe
     kitty
+    kicad
     lazygit
     lm_sensors
     lshw
