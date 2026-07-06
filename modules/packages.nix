@@ -62,6 +62,7 @@ in {
     pciutils
     pv
     pwvucontrol
+    quickshell
     readmbn
     sshfs
     refine
