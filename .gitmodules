@@ -28,3 +28,6 @@
 [submodule "git_repositories/emacs"]
 	path = git_repositories/emacs
 	url = git@66-firebat:66-firebat/emacs.git
+[submodule "git_repositories/hyprsphere"]
+	path = git_repositories/hyprsphere
+	url = git@66-firebat:66-firebat/hyprsphere.git
